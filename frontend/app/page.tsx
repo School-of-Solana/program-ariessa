@@ -3,17 +3,23 @@
 import { useEffect, useState } from "react";
 import { Connection } from "@solana/web3.js";
 import * as anchor from "@coral-xyz/anchor";
+import Image from "next/image";
 import idl from "../idl/book.json";
 import Header from "../components/header";
 import Footer from "../components/footer";
 
-const RPC = process.env.NEXT_PUBLIC_SOLANA_DEVNET_RPC ?? "http://127.0.0.1:8899";
+const RPC =
+  process.env.NEXT_PUBLIC_SOLANA_DEVNET_RPC ?? "http://127.0.0.1:8899";
 
 function bnToNumber(bn: any): number | null {
   if (bn == null) return null;
   if (typeof bn === "number") return bn;
   if (typeof bn.toNumber === "function") return bn.toNumber();
   return Number(bn);
+}
+
+function sleep(ms: number) {
+  return new Promise((res) => setTimeout(res, ms));
 }
 
 function toDateString(ts: any): string | null {
@@ -117,22 +123,16 @@ function SkeletonCard() {
   );
 }
 
-function SkeletonGrid() {
-  return (
-    <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {[...Array(8)].map((_, i) => (
-        <li key={i} className="h-full">
-          <SkeletonCard />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function BookCard({ book }: { book: BookData }) {
+function BookCard({ book, index }: { book: BookData; index?: number }) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [frontImgLoaded, setFrontImgLoaded] = useState(false);
+  const [backImgLoaded, setBackImgLoaded] = useState(false);
+
   const solscanUrl = `https://solscan.io/account/${book.pubkey}?cluster=devnet`;
   const { main, subtitle } = formatTitle(book.title);
+
+  const imgSrc = book.image;
+  const eager = (index ?? 0) < 6; // prioritize first few images
 
   return (
     <div
@@ -166,15 +166,32 @@ function BookCard({ book }: { book: BookData }) {
         >
           {/* Fixed height image container - flip trigger */}
           <div
-            className="flex h-44 shrink-0 cursor-pointer items-center justify-center bg-gray-100 p-4"
+            className="flex h-44 shrink-0 cursor-pointer items-center justify-center bg-gray-100 p-4 relative"
             onMouseEnter={() => setIsFlipped(true)}
           >
+            {/* Image + placeholder overlay */}
             {book.image ? (
-              <img
-                src={book.image}
-                alt={`Cover of ${book.title}`}
-                className="h-36 w-24 rounded object-cover shadow pointer-events-none"
-              />
+              <>
+                <Image
+                  src={imgSrc}
+                  alt={`Cover of ${book.title}`}
+                  width={160}
+                  height={240}
+                  className={
+                    "h-36 w-24 rounded object-cover shadow pointer-events-none transition-opacity duration-300 ease-out" +
+                    (frontImgLoaded ? " opacity-100" : " opacity-0")
+                  }
+                  priority={eager}
+                  loading={eager ? "eager" : "lazy"}
+                  style={{ objectFit: "cover", willChange: "opacity" }}
+                  onLoadingComplete={() => setFrontImgLoaded(true)}
+                />
+                {!frontImgLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center rounded bg-gray-200">
+                    <BookPlaceholderIcon />
+                  </div>
+                )}
+              </>
             ) : (
               <div className="flex h-36 w-24 items-center justify-center rounded bg-gray-200 pointer-events-none">
                 <BookPlaceholderIcon />
@@ -268,13 +285,26 @@ function BookCard({ book }: { book: BookData }) {
           }}
         >
           {/* Book cover - larger display */}
-          <div className="flex flex-1 items-center justify-center bg-linear-to-b from-gray-100 to-gray-50 p-4">
+          <div className="flex flex-1 items-center justify-center bg-linear-to-b from-gray-100 to-gray-50 p-4 relative">
             {book.image ? (
-              <img
-                src={book.image}
-                alt={`Cover of ${book.title}`}
-                className="h-56 w-40 rounded-lg object-cover shadow-xl ring-1 ring-gray-200 pointer-events-none"
-              />
+              <>
+                <Image
+                  src={imgSrc}
+                  alt={`Cover of ${book.title}`}
+                  width={320}
+                  height={448}
+                  className="h-56 w-40 rounded-lg object-cover shadow-xl ring-1 ring-gray-200 pointer-events-none"
+                  priority={eager}
+                  loading={eager ? "eager" : "lazy"}
+                  style={{ objectFit: "cover" }}
+                  onLoadingComplete={() => setBackImgLoaded(true)}
+                />
+                {!backImgLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-gray-200 shadow-xl">
+                    <BookPlaceholderIcon />
+                  </div>
+                )}
+              </>
             ) : (
               <div className="flex h-56 w-40 items-center justify-center rounded-lg bg-gray-200 shadow-xl pointer-events-none">
                 <BookPlaceholderIcon />
@@ -324,13 +354,6 @@ function EmptyState() {
             We couldn't load any books at the moment. Please try again later.
           </p>
         </div>
-
-        {/* Decorative dots */}
-        <div className="flex items-center gap-1.5 pt-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
-          <span className="h-1.5 w-1.5 rounded-full bg-gray-200" />
-          <span className="h-1.5 w-1.5 rounded-full bg-gray-100" />
-        </div>
       </div>
     </div>
   );
@@ -345,6 +368,7 @@ export default function Home() {
     try {
       setLoading(true);
       setError(false);
+      await sleep(500);
       const connection = new Connection(RPC, "confirmed");
       const provider = new anchor.AnchorProvider(connection, {} as any, {});
       const program = new anchor.Program(idl as anchor.Idl, provider);
@@ -352,14 +376,20 @@ export default function Home() {
       const raw = await (program.account as any).book.all();
       const parsed: BookData[] = raw.map((item: any) => ({
         pubkey: item.publicKey.toBase58(),
+        owner: item.account.owner ? item.account.owner.toBase58() : "",
         title: item.account.title,
         author: item.account.author,
         isbn: item.account.isbn,
         publisher: item.account.publisher,
         genre: item.account.genre,
-        format: item.account.format,
-        publicationDate: toDateString(item.account.publicationDate),
+        format: item.account.format ?? item.account.format_ ?? "",
+        publicationDate: toDateString(
+          item.account.publicationDate ?? item.account.publication_date
+        ),
         image: item.account.image,
+        createdAt: toDateString(
+          item.account.createdAt ?? item.account.created_at
+        ),
       }));
       setBooks(parsed);
     } catch (err) {
@@ -388,8 +418,8 @@ export default function Home() {
           <EmptyState />
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {books.map((book) => (
-              <BookCard key={book.pubkey} book={book} />
+            {books.map((book, idx) => (
+              <BookCard key={book.pubkey} book={book} index={idx} />
             ))}
           </div>
         )}
