@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use std::str::FromStr;
 
 declare_id!("BoRFBZWJTzhHmKmR4VPHpWBXzi7odY23zwJT98u8CZvo");
 
@@ -43,7 +42,7 @@ pub mod book {
         require!(format_.len() <= Book::MAX_FORMAT, CustomError::FormatTooLong);
         require!(genre.len() <= Book::MAX_GENRE, CustomError::GenreTooLong);
 
-        book.owner = *ctx.accounts.authority.key;
+        // admin is the canonical owner
         book.title = title;
         book.author = author;
         book.isbn = isbn;
@@ -60,15 +59,24 @@ pub mod book {
     }
 
     pub fn update_genre(ctx: Context<UpdateGenre>, genre: String) -> Result<()> {
-        let book = &mut ctx.accounts.book;
-        require!(book.owner == *ctx.accounts.authority.key, CustomError::Unauthorized);
+        // require caller is the configured admin
+        require!(
+            ctx.accounts.config.admin == *ctx.accounts.authority.key,
+            CustomError::Unauthorized
+        );
         require!(genre.len() <= Book::MAX_GENRE, CustomError::GenreTooLong);
 
+        let book = &mut ctx.accounts.book;
         book.genre = genre;
         Ok(())
     }
 
     pub fn close_book(ctx: Context<CloseBook>) -> Result<()> {
+        // require caller is the configured admin
+        require!(
+            ctx.accounts.config.admin == *ctx.accounts.authority.key,
+            CustomError::Unauthorized
+        );
         Ok(())
     }
 }
@@ -87,7 +95,6 @@ impl Config {
 
 #[account]
 pub struct Book {
-    pub owner: Pubkey,
     pub title: String,
     pub author: String,
     pub isbn: String,
@@ -111,13 +118,11 @@ impl Book {
 
     // size layout:
     // 8  - discriminator
-    // 32 - owner
     // 8  - created_at
     // 8  - publication_date
     // 1  - bump
     // then each String: 4 byte prefix + bytes
     pub const MAX_SIZE: usize = 8  // discriminator
-        + 32 // owner
         + 8  // created_at
         + 8  // publication_date
         + 1  // bump
@@ -184,6 +189,9 @@ pub struct UpdateGenre<'info> {
     #[account(mut, seeds = [b"book", book.isbn.as_bytes()], bump = book.bump)]
     pub book: Account<'info, Book>,
 
+    #[account(seeds = [b"config"], bump = config.bump)]
+    pub config: Account<'info, Config>,
+
     pub authority: Signer<'info>,
 }
 
@@ -191,6 +199,9 @@ pub struct UpdateGenre<'info> {
 pub struct CloseBook<'info> {
     #[account(mut, close = authority, seeds = [b"book", book.isbn.as_bytes()], bump = book.bump)]
     pub book: Account<'info, Book>,
+
+    #[account(seeds = [b"config"], bump = config.bump)]
+    pub config: Account<'info, Config>,
 
     pub authority: Signer<'info>,
 }
