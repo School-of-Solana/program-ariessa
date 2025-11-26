@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Connection } from "@solana/web3.js";
 import * as anchor from "@coral-xyz/anchor";
-import idl from "../../anchor-project/target/idl/book.json";
+import idl from "../idl/book.json";
 import Header from "../components/header";
 import Footer from "../components/footer";
 
