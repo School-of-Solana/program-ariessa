@@ -12,7 +12,8 @@ describe("book program", () => {
   const wallet = provider.wallet;
 
   const nowBn = () => new anchor.BN(Math.floor(Date.now() / 1000));
-  const TEST_MAX_TITLE = 200;
+  const TEST_MAX_TITLE = 200; // keep in sync with programs/book/src/lib.rs
+  const TEST_MAX_IMAGE = 200; // keep in sync with programs/book/src/lib.rs
 
   async function configPDA(): Promise<[PublicKey, number]> {
     return await PublicKey.findProgramAddress(
@@ -246,6 +247,127 @@ describe("book program", () => {
       } catch (err: any) {
         const code = err?.error?.errorCode?.code ?? "";
         expect(code).to.equal("Unauthorized");
+      }
+    });
+  });
+
+  describe("update_image", () => {
+    let bookP: PublicKey;
+
+    it("Admin can update book image", async () => {
+          const isbn = `ISBN-IMG-${Date.now()}`;
+      const newImage = "https://example.com/new-image.png";
+          const [cfg] = await configPDA();
+      const [book] = await bookPDA(isbn);
+      bookP = book;
+
+      await program.methods
+        .createBook(
+          "IMG Title",
+          "IMG Author",
+          isbn,
+          "",
+          "",
+          nowBn(),
+          "",
+          "Genre"
+        )
+        .accounts({
+          book,
+          config: cfg,
+          authority: wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc();
+
+      await program.methods
+        .updateImage(newImage)
+        .accounts({
+          book: bookP,
+          config: (await configPDA())[0],
+          authority: wallet.publicKey,
+        })
+        .rpc();
+
+      const acc = await program.account.book.fetch(bookP);
+      expect(acc.image).to.equal(newImage);
+    });
+
+    it("Non-owner cannot update image", async () => {
+      const nonOwner = Keypair.generate();
+      const sig = await provider.connection.requestAirdrop(
+        nonOwner.publicKey,
+        1e9
+      );
+      await provider.connection.confirmTransaction(sig);
+
+      const isbn = `ISBN-IMG-${Date.now()}`;
+        const [cfg] = await configPDA();
+      const [book] = await bookPDA(isbn);
+      bookP = book;
+
+      await program.methods
+        .createBook(
+          "IMG Title",
+          "IMG Author",
+          isbn,
+          "",
+          "",
+          nowBn(),
+          "",
+          "Genre"
+        )
+        .accounts({
+          book,
+          config: cfg,
+          authority: wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc();
+
+      try {
+        await program.methods
+          .updateImage("https://another.example/img.png")
+          .accounts({
+            book: bookP,
+            config: (await configPDA())[0],
+            authority: nonOwner.publicKey,
+          })
+          .signers([nonOwner])
+          .rpc();
+        expect.fail("expected updateImage to fail for non-owner");
+      } catch (err: any) {
+        const code = err?.error?.errorCode?.code ?? "";
+        const msg = (
+          err?.error?.errorMessage ??
+          err?.toString() ??
+          ""
+        ).toLowerCase();
+        expect(
+          code === "Unauthorized" ||
+            msg.includes("unauthorized") ||
+            msg.includes("not owner") ||
+            msg.includes("owner")
+        ).to.be.true;
+      }
+    });
+
+    it("Admin cannot set image longer than MAX_IMAGE", async () => {
+      const longImage = "a".repeat(TEST_MAX_IMAGE + 1);
+
+      try {
+        await program.methods
+          .updateImage(longImage)
+          .accounts({
+            book: bookP,
+            config: (await configPDA())[0],
+            authority: wallet.publicKey,
+          })
+          .rpc();
+        expect.fail("expected updateImage to fail with ImageTooLong");
+      } catch (err: any) {
+        const code = err?.error?.errorCode?.code ?? "";
+        expect(code).to.equal("ImageTooLong");
       }
     });
   });

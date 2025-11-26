@@ -6,10 +6,10 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-book = "BoRFBZWJTzhHmKmR4VPHpWBXzi7odY23zwJT98u8CZvo"
+book = "EAdTq2R8jDTwFYCkYq2hm1v9webRddR3QWkLpBr31brp"
 
 [programs.devnet]
-book = "BoRFBZWJTzhHmKmR4VPHpWBXzi7odY23zwJT98u8CZvo"
+book = "EAdTq2R8jDTwFYCkYq2hm1v9webRddR3QWkLpBr31brp"
 
 [registry]
 url = "https://api.apr.dev"

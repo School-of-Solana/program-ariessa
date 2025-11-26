@@ -1,8 +1,10 @@
 # Project Description
 
-**Deployed Frontend URL:** https://bookmarked-ari.vercel.app
+**Deployed Frontend URL:** [https://bookmarked-ari.vercel.app](https://bookmarked-ari.vercel.app)
 
-**Solana Program ID:** BoRFBZWJTzhHmKmR4VPHpWBXzi7odY23zwJT98u8CZvo
+**Solana Program ID:** [EAdTq2R8jDTwFYCkYq2hm1v9webRddR3QWkLpBr31brp](https://solscan.io/account/EAdTq2R8jDTwFYCkYq2hm1v9webRddR3QWkLpBr31brp?cluster=devnet)
+
+<br />
 
 ## Project Overview
 
@@ -106,6 +108,12 @@ Tests live at: `anchor-project/tests/book.ts`. Current coverage:
   - happy: admin can update a book's genre (change persisted)
   - unhappy: non-admin signer rejected (`Unauthorized`)
 
+- update_image
+  - happy: admin can update a book's image URL (stored and fetchable)
+  - unhappy: non-admin/non-owner signer rejected (`Unauthorized`)
+  - unhappy: image length > MAX_IMAGE triggers `ImageTooLong`
+  - assertions: image field updated; other fields unchanged
+
 - close_book
   - happy: admin can close (delete) a book; account becomes non-fetchable
   - unhappy: non-admin cannot close (assert error `Unauthorized` or message contains "unauthorized"/"owner")
@@ -150,10 +158,14 @@ anchor build && anchor test
 
 <br />
 
-### Deployment script
-A convenience deploy script is included at `anchor-project/migrations/deploy.ts`.
+### Add books script
+
+A convenience script to populate book date is included at `anchor-project/migrations/add_books.ts`.
+
+<br />
 
 ## Additional Notes
 
-- The frontend is intentionally read-only; admin workflows are done off-frontend using deployment script.
+- The frontend is intentionally read-only; admin workflows are done off-frontend using a script.
 - List of books can be found at `anchor-project/migrations/books.json`.
+- All book cover images were taken by me and uploaded in the GitHub issues section of the [Bookmarked](https://github.com/ariessa/bookmarked) repository.

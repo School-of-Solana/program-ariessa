@@ -69,11 +69,11 @@ async function main() {
   const adminKp = loadKeypairFromFile(adminKeypairPath);
   console.log("Using admin key:", adminKp.publicKey.toBase58());
 
-  const rpc = process.env.SOLANA_RPC_URL || "http://127.0.0.1:8899";
+  const rpc = "https://api.devnet.solana.com";
   const connection = new anchor.web3.Connection(rpc, "confirmed");
 
   // ensure admin has some SOL
-  await ensureAirdropIfNeeded(connection, adminKp.publicKey, 2);
+  // await ensureAirdropIfNeeded(connection, adminKp.publicKey, 2);
 
   const wallet = new anchor.Wallet(adminKp);
   const provider = new anchor.AnchorProvider(

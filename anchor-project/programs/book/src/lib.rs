@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("BoRFBZWJTzhHmKmR4VPHpWBXzi7odY23zwJT98u8CZvo");
+declare_id!("EAdTq2R8jDTwFYCkYq2hm1v9webRddR3QWkLpBr31brp");
 
 #[program]
 pub mod book {
@@ -68,6 +68,19 @@ pub mod book {
 
         let book = &mut ctx.accounts.book;
         book.genre = genre;
+        Ok(())
+    }
+
+    pub fn update_image(ctx: Context<UpdateImage>, image: String) -> Result<()> {
+        // require caller is the configured admin
+        require!(
+            ctx.accounts.config.admin == *ctx.accounts.authority.key,
+            CustomError::Unauthorized
+        );
+        require!(image.len() <= Book::MAX_IMAGE, CustomError::ImageTooLong);
+
+        let book = &mut ctx.accounts.book;
+        book.image = image;
         Ok(())
     }
 
@@ -185,6 +198,18 @@ pub struct CreateBook<'info> {
 
 #[derive(Accounts)]
 pub struct UpdateGenre<'info> {
+    // use the stored isbn as seed to find the PDA
+    #[account(mut, seeds = [b"book", book.isbn.as_bytes()], bump = book.bump)]
+    pub book: Account<'info, Book>,
+
+    #[account(seeds = [b"config"], bump = config.bump)]
+    pub config: Account<'info, Config>,
+
+    pub authority: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct UpdateImage<'info> {
     // use the stored isbn as seed to find the PDA
     #[account(mut, seeds = [b"book", book.isbn.as_bytes()], bump = book.bump)]
     pub book: Account<'info, Book>,
