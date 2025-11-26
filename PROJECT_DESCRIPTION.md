@@ -12,7 +12,7 @@
 
 Bookmarked is an app to view a curated collection of books on Solana. The frontend provides a browsable grid of stored books and read-only access to on-chain data.
 
-The on-chain program (book) stores book metadata (title, author, isbn, publisher, image, format, genre, publication date) and uses a single administrative config account to control creation, updates and closing of book accounts. 
+The on-chain program (book) stores book metadata (title, author, isbn, publisher, image, format, genre, publication date) and uses a single administrative config account to control creation, updates and closing of book accounts.
 
 <br />
 
@@ -66,6 +66,9 @@ The program uses PDAs for deterministic accounts:
   - Validates lengths (e.g. title <= MAX_TITLE) and stores bump + created_at
 - update_genre(genre)
   - Admin-only. Updates the genre field of an existing book (book PDA must be provided)
+- update_image(image)
+  - Admin-only. Updates the image URL of an existing book (book PDA must be provided).
+  - Validates length (e.g. image <= MAX_IMAGE) and stores the new image string.
 - close_book()
   - Admin-only. Closes the book account and transfers lamports to admin (close = authority in account attrs)
 
@@ -107,20 +110,24 @@ Important notes:
 Tests live at: `anchor-project/tests/book.ts`. Current coverage:
 
 - initialize_config
+
   - happy: create config PDA and set admin to signer
   - unhappy: cannot initialize twice (account already in use)
 
 - create_book
+
   - happy: admin can create a book with full metadata
   - unhappy: title > MAX_TITLE triggers `TitleTooLong`
   - unhappy: non-admin signer rejected (`UnauthorizedCreator`)
-  - assertions: stored fields (title, isbn, format_/format, genre)
+  - assertions: stored fields (title, isbn, format\_/format, genre)
 
 - update_genre
+
   - happy: admin can update a book's genre (change persisted)
   - unhappy: non-admin signer rejected (`Unauthorized`)
 
 - update_image
+
   - happy: admin can update a book's image URL (stored and fetchable)
   - unhappy: non-admin/non-owner signer rejected (`Unauthorized`)
   - unhappy: image length > MAX_IMAGE triggers `ImageTooLong`
@@ -131,6 +138,7 @@ Tests live at: `anchor-project/tests/book.ts`. Current coverage:
   - unhappy: non-admin cannot close (assert error `Unauthorized` or message contains "unauthorized"/"owner")
 
 Notes:
+
 - Boundary tests (exact MAX lengths) and additional field-length errors can be added following the same patterns.
 - Mirrored constants: tests define TEST_MAX_TITLE = 200 to match Rust's `MAX_TITLE`.
 
@@ -150,9 +158,9 @@ anchor build && anchor test
 
 1. Set Solana CLI to devnet and ensure deploy keypair.
 
-    ```bash
-    solana config set --url https://api.devnet.solana.com
-    ```
+   ```bash
+   solana config set --url https://api.devnet.solana.com
+   ```
 
 2. Airdrop SOL to deployer.
 
