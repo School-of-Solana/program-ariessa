@@ -7,7 +7,7 @@ import idl from "../idl/book.json";
 import Header from "../components/header";
 import Footer from "../components/footer";
 
-const RPC = process.env.NEXT_PUBLIC_SOLANA_RPC ?? "http://127.0.0.1:8899";
+const RPC = process.env.NEXT_PUBLIC_SOLANA_DEVNET_RPC ?? "http://127.0.0.1:8899";
 
 function bnToNumber(bn: any): number | null {
   if (bn == null) return null;
