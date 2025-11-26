@@ -29,6 +29,18 @@ The on-chain program (book) stores book metadata (title, author, isbn, publisher
 - The frontend is a read-only UI that fetches and displays books from the deployed Solana program.
 - There is no wallet connect or mutation UI in the frontend; all create/update/delete operations are performed on-chain via deploy script.
 
+### Home Page
+
+<img src="screenshots/home_page.png" alt="Home Page" />
+<img src="screenshots/loading.png" alt="Home Page (loading)" />
+<img src="screenshots/empty_state.png" alt="Home Page (empty state)" />
+
+<br />
+
+### Not Found Page
+
+<img src="screenshots/not_found_page.png" alt="Home Page" />
+
 <br />
 
 ## Program Architecture
