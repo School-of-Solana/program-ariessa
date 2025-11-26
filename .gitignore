@@ -1,0 +1,4 @@
+# Test ledger
+test-ledger/
+.test-ledger/
+.DS_Store

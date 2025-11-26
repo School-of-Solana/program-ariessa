@@ -1,0 +1,112 @@
+[
+  {
+    "title": "The Psychology of Money",
+    "author": "Morgan Housel",
+    "isbn": "9780857197689",
+    "image": "",
+    "publisher": "Harriman House",
+    "publication_date": "2020-09-08",
+    "format": "Paperback",
+    "genre": "Finance",
+    "pages": "256"
+  },
+  {
+    "title": "Proof of Stake: The Making of Ethereum and the Philosophy of Blockchains",
+    "author": "Vitalik Buterin and Nathan Schneider",
+    "isbn": "9780008562793",
+    "image": "",
+    "publisher": "HarperCollins",
+    "publication_date": "2022-12-22",
+    "format": "Paperback",
+    "genre": "Blockchain",
+    "pages": "256"
+  },
+  {
+    "title": "Same as Ever: Timeless Lessons on Risk, Opportunity and Living a Good Life",
+    "author": "Morgan Housel",
+    "isbn": "9781804090633",
+    "image": "",
+    "publisher": "Harriman House",
+    "publication_date": "2023-11-07",
+    "format": "Paperback",
+    "genre": "Finance",
+    "pages": "250"
+  },
+  {
+    "title": "Automated Market Makers: A Practical Guide to Decentralized Exchanges and Cryptocurrency Trading",
+    "author": "Miguel Ottina, Peter Johannes Steffensen, and Jesper Kristensen",
+    "isbn": "9781484286159",
+    "image": "",
+    "publisher": "Apress",
+    "publication_date": "2023-01-02",
+    "format": "Paperback",
+    "genre": "Blockchain",
+    "pages": "308"
+  },
+  {
+    "title": "The Rust Programming Language, 2nd Edition",
+    "author": "Steve Klabnik and Carol Nichols",
+    "isbn": "9781718503106",
+    "image": "",
+    "publisher": "No Starch Press",
+    "publication_date": "2023-02-28",
+    "format": "Paperback",
+    "genre": "Programming",
+    "pages": "560"
+  },
+  {
+    "title": "Rust for Rustaceans: Idiomatic Programming for Experienced Developers",
+    "author": "Jon Gjengset",
+    "isbn": "9781718501850",
+    "image": "",
+    "publisher": "No Starch Press",
+    "publication_date": "2021-12-21",
+    "format": "Paperback",
+    "genre": "Programming",
+    "pages": "280"
+  },
+  {
+    "title": "Short Cuts: Economics: Navigate Your Way Through the Big Ideas",
+    "author": "Tejvan Pettinger and Robert Brandt",
+    "isbn": "9781837731084",
+    "image": "",
+    "publisher": "Icon Books",
+    "publication_date": "2024-02-01",
+    "format": "Hardcover",
+    "genre": "Economics",
+    "pages": "160"
+  },
+  {
+    "title": "Short Cuts: Maths: Navigate Your Way Through the Big Ideas",
+    "author": "Katie Steckles",
+    "isbn": "9781837731091",
+    "image": "",
+    "publisher": "Icon Books",
+    "publication_date": "2023-10-12",
+    "format": "Hardcover",
+    "genre": "Mathematics",
+    "pages": "160"
+  },
+  {
+    "title": "Stock Market 101, 2nd Edition: From Bull and Bear Markets to Dividends, Shares, and Margins",
+    "author": "Michele Cagan CPA ",
+    "isbn": "9781507222324",
+    "image": "",
+    "publisher": "Adams Media",
+    "publication_date": "2024-05-07",
+    "format": "Hardcover",
+    "genre": "Finance",
+    "pages": "272"
+  },
+  {
+    "title": "Blockchain, Crypto and DeFi: Bridging Finance and Technology",
+    "author": "Marco Di Maggio",
+    "isbn": "9781394275892",
+    "image": "",
+    "publisher": "Wiley",
+    "publication_date": "2024-10-01",
+    "format": "Hardcover",
+    "genre": "Blockchain",
+    "pages": "752"
+  }
+]
